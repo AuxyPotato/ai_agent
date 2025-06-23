@@ -11,7 +11,6 @@ def main():
     load_dotenv()
     api_key = os.environ.get("GEMINI_API_KEY")
     client = genai.Client(api_key=api_key)
-
     user_prompt = prompt()
     options = parse_arguments()
 
@@ -22,14 +21,10 @@ def main():
         model="gemini-2.0-flash-001",
         contents=messages,
     )
-
     prompt_tokens = response.usage_metadata.prompt_token_count
     response_tokens = response.usage_metadata.candidates_token_count
 
-    if options.verbose:
-        print_verbose(response, prompt_tokens, response_tokens, user_prompt)
-    else:
-        print_response(response)
+    print_response(response, prompt_tokens, response_tokens, user_prompt, options)
 
 
 def prompt():
@@ -47,17 +42,12 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def print_verbose(response, prompt_tokens, response_tokens, user_prompt):
-    print(f"User prompt: {user_prompt} \n")
+def print_response(response, prompt_tokens, response_tokens, user_prompt, options):
+    if options.verbose:
+        print(f"User prompt: {user_prompt} \n")
+        print(f"Prompt tokens: {prompt_tokens}")
+        print(f"Response tokens: {response_tokens} \n")
     print(response.text)
-    print(f"Prompt tokens: {prompt_tokens}")
-    print(f"Response tokens: {response_tokens}")
-
-
-def print_response(response):
-    print(response.text)
-
-
 
 
 if __name__ == "__main__":
