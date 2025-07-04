@@ -13,10 +13,5 @@ def main():
     print(run_python_file("calculator", "nonexistent.py"))
 
 
-
-
-
-
-
 if __name__ == "__main__":
     main()

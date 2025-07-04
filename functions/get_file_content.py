@@ -1,5 +1,6 @@
 import os
 
+
 def get_file_content(working_directory, file_path):
     if file_path is None:
         return f'Error: Cannot get "{file_path}" from "{working_directory}"'
