@@ -1,31 +1,27 @@
 import os
 
 
-def get_files_info(working_directory, directory=None):
-    if directory is None:
-        dir_path = os.path.abspath(working_directory)
-    else:
-        dir_path = os.path.abspath(os.path.join(working_directory, directory))
-
-    if (not dir_path.startswith(os.path.abspath(working_directory))
-            or directory is not None and directory.startswith("..")):
-        return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
-    elif not os.path.isdir(dir_path):
+def get_files_info(working_directory, directory='.'):
+    working_dir_abs = os.path.realpath(working_directory)
+    target_dir = os.path.realpath(os.path.join(working_dir_abs, directory))
+    if os.path.commonpath([working_dir_abs, target_dir]) != working_dir_abs:
+        return (f'Error: Cannot list "{directory}" as it is outside '
+                f'the permitted working directory')
+    elif not os.path.isdir(target_dir):
         return f'Error: "{directory}" is not a directory'
 
     try:
-        contents = os.listdir(dir_path)
+        contents = os.listdir(target_dir)
     except OSError as e:
         return f'Error: {e}'
-
     contents_string = ""
     try:
         for item in contents:
-            contents_string += (f"{item}: "
-                                f"file_size={os.path.getsize(os.path.join(dir_path, item))} bytes, "
-                                f"is_dir={os.path.isdir(os.path.join(dir_path, item))}\n")
-
+            contents_string += (f"- {item}: "
+                                f"file_size={os.path.getsize(
+                                    os.path.join(target_dir, item))} bytes, "
+                                f"is_dir={os.path.isdir(
+                                    os.path.join(target_dir, item))}\n")
     except OSError as e:
         return f'Error: {e}'
-
     return contents_string
