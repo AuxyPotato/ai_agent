@@ -1,6 +1,8 @@
 import os
 import subprocess
 
+from google.genai import types
+
 
 def run_python_file(working_directory, file_path, args=None):
     working_dir_abs = os.path.realpath(working_directory)
@@ -14,9 +16,12 @@ def run_python_file(working_directory, file_path, args=None):
         return f'Error: "{file_path}" is not a Python file.'
 
     try:
-        output = subprocess.run(['python3', target_file],
+        cmd = ["python3", target_file]
+        if args:
+            cmd.extend(args)
+        output = subprocess.run(cmd,
                                 capture_output=True,
-                                cwd=os.path.abspath(working_directory),
+                                cwd=os.path.realpath(working_directory),
                                 timeout=30)
         stdout = output.stdout.decode("utf-8")
         stderr = output.stderr.decode("utf-8")
@@ -28,3 +33,28 @@ def run_python_file(working_directory, file_path, args=None):
         return result
     except (subprocess.TimeoutExpired, Exception) as e:
         return f"Error: executing Python file: {e}"
+
+
+schema_run_python_file = types.FunctionDeclaration(
+    name="run_python_file",
+    description="Executes a Python file and returns its output. The file must be within the working directory and have a .py extension.",
+    parameters=types.Schema(
+        required=["file_path"],
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="File path to target file to execute, relative to the working directory",
+            ),
+            "args": types.Schema(
+                type=types.Type.ARRAY,
+                description="Optional array of arguments to pass to the execution of the target file",
+                items=types.Schema(
+                    type=types.Type.STRING,
+                    description="Individual argument to pass to the execution of the target file",
+                ),
+
+            ),
+        },
+    ),
+)
